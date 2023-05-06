@@ -70,8 +70,6 @@ void uplevel(int init_level){
 				}
 			}
 		}
-
-	cout << newsize << endl;
 }
 
 int N6 = 0;
@@ -116,6 +114,8 @@ mbf9 make9(boost::random::mt19937& rng) {
 double startTime;
 
 int seed = 1;
+int t_limit;
+int n_thread;
 
 void threadFunction()
 {
@@ -133,7 +133,7 @@ void threadFunction()
       t1 = TimeMillis();
       std::cout << arg << "\t" << (t1-startTime) << "\t" << m << std::endl;
       coutMutex.unlock();
-      if (t1 > (startTime + 86400)) 
+      if (t1 > (startTime + t_limit)) 
         return;
     };
 }
@@ -156,7 +156,8 @@ int main(int argc, char* argv[])
 	N6 = funcsize[6];
 
      seed = atoi(argv[1]);
-     cout << "seed = " << seed << endl;
+     t_limit = atoi(argv[2]);
+     n_thread = atoi(argv[3]);
     //ofstream wf("mbf9rnd.dat", ios::out | ios::binary);
     //if(!wf) {
     //  cout << "Cannot open file!" << endl;
@@ -171,19 +172,19 @@ int main(int argc, char* argv[])
     //}
     //cout << m7 << endl;
 
-    std::thread myThreads[10];
-    for (int i = 0; i < 10; i++)
+    std::thread myThreads[n_thread];
+    for (int i = 0; i < n_thread; i++)
     {
         myThreads[i] = std::thread(threadFunction);
     }
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < n_thread; i++)
     {
         myThreads[i].join();
     }
 
     double t1 =TimeMillis();
-    cout << "run time: " << (t1-startTime) << endl;
+    //cout << "run time: " << (t1-startTime) << endl;
     //wf.close();
 
     return 0;
