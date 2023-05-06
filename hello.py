@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import asyncio
 import _datetime
+from datetime import datetime, timedelta
 from typing import AsyncIterable
 
 from yapapi import Golem, Task, WorkContext
@@ -33,7 +34,7 @@ class MyStrategy(MarketStrategy):
 async def worker(context: WorkContext, tasks: AsyncIterable[Task]):
     async for task in tasks:
         script = context.new_script()
-        script.run("/bin/sh","-c","./mbf9rng " + str(task.data) + " 120 1 >> result.bin")
+        script.run("/bin/sh","-c","./mbf9rng " + str(task.data) + " 300 1 >> result.bin")
         script.run("/bin/sh","-c","cp result.bin /golem/output")
         future_result = script.download_file("/golem/output/result.bin", "result" + str(task.data) + ".bin")
         yield script
@@ -46,12 +47,12 @@ async def main():
     )
 
     tasks = []
-    for i in range (1, 100):
-        tasks.append(Task(data=i*30))
+    for i in range (0, 2):
+        tasks.append(Task(data=1026964 + i*30))
 
 #    async with Golem(budget=1.0, subnet_tag="public", strategy=MyStrategy()) as golem:
-    async with Golem(budget=1.0, subnet_tag="public") as golem:
-        async for completed in golem.execute_tasks(worker, tasks, payload=package):
+    async with Golem(budget=100.0, subnet_tag="public") as golem:
+        async for completed in golem.execute_tasks(worker, tasks, payload=package, max_workers=50, timeout=timedelta(minutes=120)):
             print(completed.result.stdout)
 
 
